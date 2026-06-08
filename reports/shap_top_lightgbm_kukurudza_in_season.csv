@@ -1,0 +1,11 @@
+feature,mean_abs_shap
+Org_kg_ha_or_share,0.518870769316175
+K_kg_ha,0.50255310667989
+Mineral_treated_share_lag2,0.20966817010799507
+Mineral_treated_share_lag1,0.18856110491696695
+Area_ha,0.10894443152348232
+P2O5_kg_ha,0.08870703135865476
+Org_kg_ha_or_share_lag1,0.055430203255731725
+Org_kg_ha_or_share_lag3,0.03471152040688308
+Area_ha_lag1,0.012468631260407587
+Mineral_treated_share,0.012272228073018414

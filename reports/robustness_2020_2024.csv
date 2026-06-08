@@ -1,0 +1,7 @@
+crop,model,scenario,lag_config,mae,rmse,mape,n,approach_type,approach_name,window,baseline
+Пшениця,elasticnet,lag_only,L1,0.36393135098985807,0.36393135098985807,7.584510078904472,5,ml,elasticnet,2020_2024,
+Пшениця,,,,0.4341176823176841,0.4341176823176841,9.838023766311029,5,baseline,forecast_linear,2020_2024,forecast_linear
+Кукурудза,lightgbm,lag_only,L1,0.5430779514329165,0.5430779514329165,8.553795645415741,5,ml,lightgbm,2020_2024,
+Кукурудза,,,,0.9664960372960458,0.9664960372960458,16.378118790895606,5,baseline,forecast_linear,2020_2024,forecast_linear
+Соняшник,lightgbm,lag_only,L1,0.17525809435145323,0.17525809435145323,6.8659686882914555,5,ml,lightgbm,2020_2024,
+Соняшник,,,,0.18951153076193256,0.18951153076193256,7.516324463908963,2,baseline,linest_lag_only,2020_2024,linest_lag_only

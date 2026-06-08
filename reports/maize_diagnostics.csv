@@ -1,0 +1,17 @@
+analysis_type,model,year,abs_error,feature_group,mae,delta_mae
+yearly_error,lightgbm,2022.0,0.13923433275272235,,0.13923433275272235,
+yearly_error,lightgbm,2023.0,0.792336349568977,,0.792336349568977,
+yearly_error,lightgbm,2024.0,1.1444258372964544,,1.1444258372964544,
+yearly_error,linest_lag_only,2023.0,2.2041740121142084,,2.2041740121142084,
+yearly_error,linest_lag_only,2024.0,0.33958972442442903,,0.339589724424429,
+yearly_error,arima,2022.0,0.9818134249751722,,0.9818134249751722,
+yearly_error,arima,2023.0,2.172508026514759,,2.172508026514759,
+yearly_error,arima,2024.0,0.5545107248825349,,0.5545107248825349,
+feature_group_ablation,lightgbm,,,yield_history,0.6860221612181668,-0.005976678654551093
+feature_group_ablation,lightgbm,,,area,0.6453429014057089,-0.046655938467008995
+feature_group_ablation,lightgbm,,,fertiliser_n,0.7605390052701623,0.06854016539744434
+feature_group_ablation,lightgbm,,,fertiliser_p,0.7304733361880574,0.0384744963153395
+feature_group_ablation,lightgbm,,,fertiliser_k,0.7168836355786112,0.024884795705893303
+feature_group_ablation,lightgbm,,,mineral_share,1.5829311017783978,0.8909322619056799
+feature_group_ablation,lightgbm,,,organics,0.6507863079857247,-0.04121253188699325
+feature_group_ablation,lightgbm,,,irrigation,0.8584106874939202,0.1664118476212023

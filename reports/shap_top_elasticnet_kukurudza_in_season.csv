@@ -1,0 +1,11 @@
+feature,mean_abs_shap
+Yield_t_ha_lag1,0.09768909602168441
+Org_kg_ha_or_share_lag2,0.02438121668428037
+Irrig_m3_ha_lag3,0.014858218769942392
+Irrig_mm_lag3,0.014842570925507647
+Mineral_treated_share_lag2,0.009011647092308934
+ma5_Org,0.0
+K_kg_ha_lag3,0.0
+Irrig_m3_ha_lag2,0.0
+Irrig_mm_lag2,0.0
+Yield_t_ha_lag3,0.0
