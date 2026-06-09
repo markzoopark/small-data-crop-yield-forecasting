@@ -13,7 +13,7 @@ Territories:
 - Cherkasy
 - Ukraine
 
-Poltava is the main case for the article. Vinnytsia, Cherkasy, and Ukraine are added as an external check, so the workflow is not tested only on one oblast.
+Poltava is the main case study. Vinnytsia, Cherkasy, and Ukraine are added as an external check, so the workflow is not tested only on one oblast.
 
 Crops:
 
@@ -85,13 +85,6 @@ Run tests:
 python -m pytest -q
 ```
 
-Build the draft article locally, if the local DOCM example is present:
-
-```bash
-python scripts/build_mini_article_figures.py
-python scripts/build_reliability_article.py
-```
-
 ## Main outputs
 
 Important files in `reports/`:
@@ -108,9 +101,7 @@ Important files in `reports/`:
 - `multi_region_forecast_cards.csv` - forecast cards for all region-crop cases
 - `region_comparison_summary.csv` - short comparison by territory
 - `decision_threshold_sensitivity.csv` - checks margins 0.00, 0.03, 0.05, 0.10 t/ha
-- `novelty_evidence_table.csv` - compact table used in the article
-
-The article DOCM and formatted article figures are kept locally and are not stored in this GitHub repository.
+- `novelty_evidence_table.csv` - compact evidence table for reporting the workflow results
 
 ## Important warning
 
@@ -118,7 +109,7 @@ The dataset is very small: one annual observation per crop for each territory an
 
 The important point is not that Excel-style functions are "better". They are control baselines. ML has to earn recommendation by beating them by a practical margin.
 
-The multi-region check gives a stronger article story:
+The multi-region check gives a stronger robustness check:
 
 - maize is usually the clearest ML-positive case
 - wheat often stays with a transparent baseline

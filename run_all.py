@@ -14,7 +14,7 @@ import typer
 from rich.console import Console
 
 from agrostats.features import OUTPUT_PARQUET
-from agrostats import article_figures, baselines, eda, features, io, normalize, revision, train, validate
+from agrostats import baselines, features, io, normalize, revision, train, validate
 
 
 app = typer.Typer(help="Run the full AgroStats pipeline with a single command.")
@@ -43,7 +43,6 @@ def pipeline(
     region: str,
     languages: str,
     run_baselines: bool,
-    run_figures: bool,
 ) -> None:
     raw_dir = ensure_raw_dir(region)
     console.rule(f"[bold green]1. Loading CSVs from {raw_dir}")
@@ -78,13 +77,8 @@ def pipeline(
         console.rule("[bold green]6. Excel baselines")
         baselines.main()
 
-    if run_figures:
-        console.rule("[bold green]7. Revision analyses")
-        revision.main()
-
-        console.rule("[bold green]8. Publication-ready figures")
-        eda.correlation_pipeline(features_df, eda.TARGET_CROPS, language_list)
-        article_figures.main()
+    console.rule("[bold green]7. Diagnostic reports")
+    revision.main()
 
     console.rule("[bold green]Done")
     console.print("[bold green]All artefacts generated under reports/[/bold green]")
@@ -109,18 +103,12 @@ def main(
         "--skip-baselines",
         help="Skip running the Excel baseline comparison (scripts/baseline_excel.py).",
     ),
-    skip_figures: bool = typer.Option(
-        False,
-        "--skip-figures",
-        help="Skip regenerating publication figures (scripts/export_article_figures.py).",
-    ),
 ) -> None:
     """Run the full pipeline (ingest → normalise → features → validate → models → reports)."""
     pipeline(
         region=region,
         languages=languages,
         run_baselines=not skip_baselines,
-        run_figures=not skip_figures,
     )
 
 

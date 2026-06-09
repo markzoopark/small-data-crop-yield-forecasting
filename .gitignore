@@ -12,3 +12,8 @@ paper/rendered/
 paper/submission_figures_en/
 reports/figures/
 reports/figures_article/
+
+# Local article-generation helpers stay outside the public code repository.
+scripts/build_reliability_article.py
+scripts/build_mini_article_figures.py
+src/agrostats/article_figures.py
