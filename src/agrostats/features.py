@@ -170,7 +170,8 @@ def build_features(df_norm: pd.DataFrame) -> pd.DataFrame:
     irrig_mm = _select_metric(df, metric="Зрошення", unit="mm", include_group=False)
     features = _merge_feature(features, irrig_mm, column_name="Irrig_mm", on=["region", "year"])
 
-    features = features.sort_values(["group_or_crop", "year"]).reset_index(drop=True)
+    history_groups = ["region", "group_or_crop"]
+    features = features.sort_values(history_groups + ["year"]).reset_index(drop=True)
 
     factor_columns = [
         "Yield_t_ha",
@@ -187,7 +188,7 @@ def build_features(df_norm: pd.DataFrame) -> pd.DataFrame:
     for column in factor_columns:
         for lag in (1, 2, 3):
             lag_column = f"{column}_lag{lag}"
-            features[lag_column] = features.groupby("group_or_crop")[column].shift(lag)
+            features[lag_column] = features.groupby(history_groups)[column].shift(lag)
 
     rolling_map = {
         "Yield_t_ha": "ma5_Yield",
@@ -203,7 +204,7 @@ def build_features(df_norm: pd.DataFrame) -> pd.DataFrame:
     for source, target in rolling_map.items():
         # Use only historical information for moving averages to avoid look-ahead leakage.
         features[target] = (
-            features.groupby("group_or_crop")[source]
+            features.groupby(history_groups)[source]
             .transform(lambda s: s.shift(1).rolling(window=5, min_periods=5).mean())
         )
 

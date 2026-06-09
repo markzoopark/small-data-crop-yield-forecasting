@@ -1,0 +1,4 @@
+crop,model,scenario,lag_config,residual_n,validation_mae,validation_rmse,empirical_abs_error_q80,band_quantile,band_note,test_n,test_coverage,mean_band_width
+Кукурудза,elasticnet,lag_only,L1,3,1.0826920638622768,1.1001010643742726,1.2284791695313986,0.8,"Empirical validation-residual diagnostic band; small-sample uncertainty screen, not a formal confidence interval.",3,0.6666666666666666,2.456958339062797
+Пшениця,elasticnet,lag_only,L1,3,0.326000285648985,0.3263125194074368,0.3366799802987185,0.8,"Empirical validation-residual diagnostic band; small-sample uncertainty screen, not a formal confidence interval.",3,0.6666666666666666,0.6733599605974371
+Соняшник,xgboost,lag_only,L1,3,0.33206383387247723,0.35735514021289044,0.4298390655517578,0.8,"Empirical validation-residual diagnostic band; small-sample uncertainty screen, not a formal confidence interval.",3,1.0,0.8596781311035157

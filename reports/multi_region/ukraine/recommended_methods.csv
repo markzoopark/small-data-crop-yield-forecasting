@@ -1,0 +1,4 @@
+crop,crop_en,recommended_type,recommended_method,recommended_mae,best_ml_model,best_ml_mae,best_baseline,best_baseline_method,best_baseline_mae,ml_gain_vs_baseline,practical_margin,test_coverage,warning_label,best_baseline_raw,best_ml_model_raw,model
+Кукурудза,maize,machine_learning,ElasticNet,0.5510105677200992,ElasticNet,0.5510105677200992,ARIMA,ARIMA,0.6572813281193636,0.10627076039926442,0.05,0.6666666666666666,within expected error,arima,elasticnet,elasticnet
+Соняшник,sunflower,baseline,ARIMA,0.11235746521065397,XGBoost,0.26101198832194017,ARIMA,ARIMA,0.11235746521065397,-0.14865452311128619,0.05,1.0,baseline safer,arima,xgboost,xgboost
+Пшениця,wheat,baseline,FORECAST.LINEAR,0.2720784770784788,ElasticNet,0.5514741959908765,FORECAST.LINEAR,FORECAST.LINEAR,0.2720784770784788,-0.27939571891239773,0.05,0.6666666666666666,baseline safer,forecast_linear,elasticnet,elasticnet

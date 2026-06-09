@@ -1,0 +1,5 @@
+region_slug,region_label,crops,ml_recommendations,baseline_recommendations,mean_test_coverage,outside_error_scale,baseline_safer
+cherkasy,Cherkasy,3,2,1,0.8888888888888888,0,1
+poltava,Poltava,3,2,1,0.6666666666666666,1,1
+ukraine,Ukraine,3,1,2,0.7777777777777777,0,2
+vinnytsia,Vinnytsia,3,2,1,0.6666666666666666,0,1

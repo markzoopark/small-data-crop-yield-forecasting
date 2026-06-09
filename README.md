@@ -4,7 +4,18 @@ This is a small research project for crop yield forecasting from official agricu
 
 The main idea is simple: do not say that machine learning is better just because a model was trained. The code first compares ML models with simple baselines. ML is recommended only when it beats the best baseline by a practical margin. The forecast also gets a small reliability check based on validation errors.
 
-The current example uses Poltava region, Ukraine, for 2010-2024. Crops:
+The current project uses official AgroStats data for 2010-2024.
+
+Territories:
+
+- Poltava
+- Vinnytsia
+- Cherkasy
+- Ukraine
+
+Poltava is the main case for the article. Vinnytsia, Cherkasy, and Ukraine are added as an external check, so the workflow is not tested only on one oblast.
+
+Crops:
 
 - wheat
 - maize
@@ -16,6 +27,9 @@ This is a benchmark for small annual datasets. It is not a production forecastin
 
 - `src/agrostats/` - the Python code
 - `data/raw/agrostats/poltava/` - raw AgroStats CSV files used here
+- `data/raw/agrostats/vinnytsia/` - external region check data
+- `data/raw/agrostats/cherkasy/` - external region check data
+- `data/raw/agrostats/ukraine/` - national-level scale check data
 - `reports/` - generated metrics and reliability summaries
 - `paper/` - the draft article and figures
 - `tests/` - small tests for unit conversion, diagnostics, and reliability logic
@@ -54,6 +68,18 @@ Run the full pipeline:
 python run_all.py --region poltava --languages uk,en
 ```
 
+Import the extra downloaded regions again if needed:
+
+```bash
+python scripts/import_multi_region_data.py
+```
+
+Run the external multi-region check:
+
+```bash
+python scripts/run_multi_region.py
+```
+
 Run tests:
 
 ```bash
@@ -77,6 +103,12 @@ Important files in `reports/`:
 - `prediction_bands.csv` - empirical validation-residual bands on test forecasts
 - `feature_group_ablation.csv` - what happens when feature groups are removed
 - `reliability_summary.md` - simple human-readable summary
+- `data_inventory.csv` - checks that each territory has the expected 91 files
+- `multi_region_recommended_methods.csv` - final decision for 4 territories x 3 crops
+- `multi_region_forecast_cards.csv` - forecast cards for all region-crop cases
+- `region_comparison_summary.csv` - short comparison by territory
+- `decision_threshold_sensitivity.csv` - checks margins 0.00, 0.03, 0.05, 0.10 t/ha
+- `novelty_evidence_table.csv` - compact table used in the article
 
 Article:
 
@@ -84,6 +116,13 @@ Article:
 
 ## Important warning
 
-The dataset is very small: one annual regional observation per crop for each year. The results should be read as a reproducible benchmark and decision-support example, not as a final operational forecast.
+The dataset is very small: one annual observation per crop for each territory and year. The results should be read as a reproducible benchmark and decision-support example, not as a final operational forecast.
 
-The wheat result is especially useful because it shows why the baseline-first rule matters: for wheat, the simple baseline is safer than the selected ML model. For maize and sunflower, ML is more useful.
+The important point is not that Excel-style functions are "better". They are control baselines. ML has to earn recommendation by beating them by a practical margin.
+
+The multi-region check gives a stronger article story:
+
+- maize is usually the clearest ML-positive case
+- wheat often stays with a transparent baseline
+- sunflower is mixed by territory
+- some ML wins still receive a reliability warning

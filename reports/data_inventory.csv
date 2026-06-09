@@ -1,0 +1,5 @@
+region_slug,region_label,file_count,expected_file_count,complete,yield_files,area_files,fertilizer_files,irrigation_files
+poltava,Poltava,91,91,True,13,17,60,1
+vinnytsia,Vinnytsia,91,91,True,13,17,60,1
+cherkasy,Cherkasy,91,91,True,13,17,60,1
+ukraine,Ukraine,91,91,True,13,17,60,1
