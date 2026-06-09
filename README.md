@@ -85,9 +85,10 @@ Run tests:
 python -m pytest -q
 ```
 
-Build the draft article locally, if the local DOCM example and article figures are present:
+Build the draft article locally, if the local DOCM example is present:
 
 ```bash
+python scripts/build_mini_article_figures.py
 python scripts/build_reliability_article.py
 ```
 

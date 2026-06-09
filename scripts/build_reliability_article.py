@@ -182,7 +182,7 @@ def _set_cell_text(cell, text: str, *, bold: bool = False) -> None:
     run.font.size = Pt(7)
 
 
-def add_fig(doc: Document, image: Path, caption: str, width: float = 5.25) -> None:
+def add_fig(doc: Document, image: Path, caption: str, width: float = 4.8) -> None:
     require(image)
     paragraph = doc.add_paragraph()
     paragraph.alignment = 1
@@ -266,7 +266,7 @@ def add_front(doc: Document, values: dict[str, pd.DataFrame]) -> None:
     sunflower = row(cards, "sunflower")
     ml_count = int((multi_cards["recommended_type"] == "machine_learning").sum())
     total_count = int(len(multi_cards))
-    add_p(doc, "Baseline-First Crop Yield Forecasting with Reliability Diagnostics for Small Official Statistics", "papertitle")
+    add_p(doc, "Baseline-First Crop Yield Forecasting for Farm Management Decision Support with Small Official Statistics", "papertitle")
     add_p(doc, "Olena Kopishynska1 [0000-0002-3138-7215]  Mark Fedorchenko1  Yurii Utkin1 [0000-0003-2732-4438]", "author")
     add_p(doc, "Igor Sliusar1 [0000-0003-1197-5666]  Viktor Liashenko2 [0000-0003-0177-6209]", "author")
     add_p(doc, "Alla Svitlychna3 [0000-0003-3674-5787] and Svitlana Pysarenko3 [0000-0003-4575-1417]", "author")
@@ -276,12 +276,13 @@ def add_front(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         "Abstract. Crop yield forecasting from small official statistics is different from forecasting with dense "
         "satellite, field, or weather datasets: the sample is short, temporal leakage is easy to introduce, and "
         "ML should not be accepted unless it beats transparent baselines. This paper presents a baseline-first "
-        "and reliability-aware workflow for wheat, maize, and sunflower yield forecasting in Poltava, Vinnytsia, "
+        "and reliability-aware workflow that can serve as a forecasting module for farm management and regional "
+        "advisory systems. Wheat, maize, and sunflower are evaluated in Poltava, Vinnytsia, "
         "Cherkasy, and national-level Ukraine data for 2010-2024. ElasticNet, XGBoost, and LightGBM are compared "
         "with naive lag-1, linear-trend, LINEST, and ARIMA baselines under a forward temporal design. The "
         "contribution is a decision layer that recommends ML only after it clears a practical MAE margin over "
         "the best baseline and then attaches empirical validation-residual bands, test coverage, feature-group "
-        "ablation, and compact forecast cards. The Poltava workflow recommends "
+        "ablation, and compact FMS-compatible forecast cards. The Poltava workflow recommends "
         f"{wheat['recommended_method']} for wheat (MAE {fmt(wheat['recommended_mae'])} t/ha), "
         f"{maize['recommended_method']} for maize (MAE {fmt(maize['recommended_mae'])} t/ha), and "
         f"{sunflower['recommended_method']} for sunflower (MAE {fmt(sunflower['recommended_mae'])} t/ha). "
@@ -298,9 +299,9 @@ def add_intro(doc: Document) -> None:
     add_h(doc, "Introduction")
     for text in [
         "Digital agriculture often assumes that good forecasting requires dense data: satellite images, farm-level measurements, detailed weather grids, soil properties, and management logs. Such data are valuable, but they are not always available for regional institutions. In many real tasks the stable source is official annual agricultural statistics. These records are public and repeatable, but they are short and aggregated.",
-        "The authors' previous work addressed precision-farming information systems, ERP and FMS platforms for agri-food management, data-driven monitoring, and digital skills for agronomy education [1-5]. The present study continues this line but narrows the task to a reproducible forecasting decision layer for small official statistics.",
+        "The authors' previous work addressed precision-farming information systems, ERP and FMS platforms for agri-food management, data-driven monitoring, and digital skills for agronomy education [1-5]. The present study continues this decision-support line by treating forecasting as a small, auditable module that can feed farm management systems rather than as an isolated model leaderboard.",
         "This creates a practical research problem. A machine-learning model can be trained on a small annual table, but the result may be fragile. Random splitting is not appropriate because the next year is the forecasting target. Hyperparameter tuning can leak future information if it is not constrained. Even when a model gives a good score, it may not be better than a simple linear trend or a lag-1 rule.",
-        "The original long study already built a leakage-safe pipeline for AgroStats data and compared ML models with baselines. The present project moves the idea further. The central question is no longer which model has the lowest test MAE. The central question is which method should be recommended after baseline comparison and reliability checks.",
+        "The study is therefore framed as a farm-management decision-support workflow. The central question is no longer which model has the lowest test MAE. The central question is which method should be recommended after baseline comparison and reliability checks, and how that recommendation should be communicated to a regional analyst.",
         "This change is important for the scientific story. In small-data forecasting, a negative result can be as useful as a positive one. Wheat is the main example in this project: the selected ML model is not recommended because the best simple baseline remains safer. Maize and sunflower show the opposite case, where ML provides enough improvement to be useful.",
         "A second motivation is reproducibility. Forecasting papers often describe the model and final accuracy but leave operational choices implicit: which years were used for tuning, whether baselines used the same information, and how to interpret a new-year error larger than expected. The repository makes these choices explicit and keeps the generated outputs as CSV and Markdown files.",
         "The proposed workflow is intentionally modest. It does not claim that annual official statistics are enough for production forecasting at farm level. It is better understood as a transparent benchmark layer that can be run before more expensive data collection is planned. If a simple baseline is already competitive, then extra modelling complexity has to justify itself. If an ML model wins, then its recommendation is still accompanied by a reliability warning rather than presented as a certain forecast.",
@@ -324,7 +325,7 @@ def add_novelty(doc: Document, values: dict[str, pd.DataFrame]) -> None:
     )
     for text in [
         "The novelty of the project is not that spreadsheet functions outperform machine learning, and not that one algorithm wins on all crops. Spreadsheet-style baselines are used as control models. Their role is to make the recommendation accountable: if an ML model cannot beat a transparent method by a practical margin, it should not be presented as the recommended forecast.",
-        "Compared with earlier platform-oriented and data-driven decision-support work [3, 4], the new repository adds a decision layer around the models. The output is no longer only a leaderboard of ElasticNet, XGBoost, and LightGBM. It produces recommended methods, reliability labels, empirical prediction bands, feature-group diagnostics, and forecast cards.",
+        "Compared with earlier platform-oriented and data-driven decision-support work [3, 4], the new repository adds a decision layer around the models. The output is no longer only a leaderboard of ElasticNet, XGBoost, and LightGBM. It produces recommended methods, reliability labels, empirical prediction bands, feature-group diagnostics, and FMS-ready forecast cards.",
         f"The multi-region extension strengthens the contribution. The same rule is applied to Poltava, Vinnytsia, Cherkasy, and Ukraine for wheat, maize, and sunflower. This creates {len(cards)} region-crop decisions: {ml_count} recommend ML and {baseline_count} keep a baseline. The national Ukraine series is treated as a scale check rather than as a direct oblast replicate.",
         f"The threshold-sensitivity file tests practical margins of 0.00, 0.03, 0.05, and 0.10 t/ha. In the current run, {switch_count} region-crop decisions change when the margin changes. This is useful evidence for the article because it shows that the recommendation is controlled by an explicit rule, not by a manually chosen story after looking at the results.",
         "The strongest conceptual difference is the treatment of negative cases. Wheat remains a control case in Poltava, Vinnytsia, and Ukraine because the transparent baseline is safer; Cherkasy wheat is different and clears the ML rule. This mixed pattern is more credible than saying that ML is always better.",
@@ -339,7 +340,7 @@ def add_methods(doc: Document) -> None:
         "The main case study uses official AgroStats records for Poltava region, Ukraine, from 2010 to 2024. Vinnytsia, Cherkasy, and national-level Ukraine records are added as an external check. The target crops are wheat, maize, and sunflower. The raw data are stored as separate CSV files by crop and indicator. The pipeline loads these files, harmonises crop names and indicators, converts units, and builds one annual crop-level table per territory.",
         "Yield is converted to tonnes per hectare. Fertiliser indicators are represented as comparable per-hectare or share variables where possible. Irrigation volume is converted into cubic metres per hectare and millimetres. The main feature set uses lagged values and five-year historical means, so the model receives only information that could be known before the forecasted harvest year.",
         "The temporal design is fixed. Years up to 2018 form the initial training period, 2019-2021 are used for validation and hyperparameter selection, and 2022-2024 are held out for the main test. For each forecast year, preprocessing is fitted only on previous years. This prevents imputation, scaling, or parameter choices from using future data.",
-        "The ML models are ElasticNet, XGBoost, and LightGBM. They are deliberately tuned on a constrained grid because the dataset is too small for broad automated search. Baselines include naive lag-1, linear trend, LINEST with lagged predictors, and ARIMA. Forecast accuracy is reported as MAE, RMSE, and MAPE, with MAE used as the main selection metric.",
+        "The ML models are ElasticNet, XGBoost, and LightGBM. They are deliberately tuned on a constrained grid because the dataset is too small for broad automated search. High-capacity neural or deep-learning architectures are not trained on the 15-year annual series, because such models would be poorly identified without denser FMS logs, sensor streams, weather grids, or satellite observations. Baselines include naive lag-1, linear trend, LINEST with lagged predictors, and ARIMA. Forecast accuracy is reported as MAE, RMSE, and MAPE, with MAE used as the main selection metric.",
         "The code is organised as a reproducible pipeline. Running `python run_all.py` loads raw data, builds features, validates the Poltava dataset, trains models, computes baselines, runs reliability diagnostics, and exports report tables. Running `python scripts/run_multi_region.py` repeats the same decision workflow for Poltava, Vinnytsia, Cherkasy, and Ukraine. Article values are taken from generated CSV files, not manual calculations.",
         "Feature construction follows a strict time direction. For each crop-year, lagged yield and lagged input variables are used instead of contemporaneous values. Rolling means are based on earlier years only. This is a small detail technically, but it is central for the interpretation of the results. Without it, the model could learn from information that would not be known at the time of making the forecast.",
         "Baselines are implemented as first-class models, not as an afterthought. The naive lag-1 rule is a persistence forecast. The linear trend baseline uses time as the only predictor. LINEST represents a spreadsheet-friendly regression option that is easy for non-programming users to reproduce. ARIMA represents a standard univariate time-series competitor. This mix is important because a practical user may prefer a weaker but transparent method if the ML gain is small.",
@@ -361,7 +362,7 @@ def add_workflow(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         f"In the current run, wheat receives `{wheat['warning_label']}` and is assigned to {wheat['recommended_method']}. Maize receives `{maize['warning_label']}` and is assigned to {maize['recommended_method']}. Sunflower receives `{sunflower['warning_label']}` and is assigned to {sunflower['recommended_method']}. These labels are deliberately simple because the dataset is small.",
         "The empirical bands are based only on validation residuals. This prevents the test period from defining its own uncertainty. The band width is the recent error scale observed before the final evaluation period. If a test observation falls outside that band, the problem is not automatically model failure, but it is a warning that the new year behaves differently from the validation period.",
         "The warning labels are designed for conservative use. `Within expected error` means the selected method clears the baseline rule and the test errors mostly stay inside the validation band. `Outside validation error scale` means that ML wins by MAE but the residual pattern is less reliable. `Baseline safer` means the model has not earned a recommendation over the best simple alternative.",
-        "Forecast cards deliberately combine numbers and text. The card format connects the recommendation to the baseline comparison, empirical band, and most useful feature group. This is the main operational difference between the new project and the original long manuscript.",
+        "Forecast cards deliberately combine numbers and text. The card format connects the recommendation to the baseline comparison, empirical band, and most useful feature group. This makes the output closer to a farm-management decision-support object than to a conventional model-ranking table.",
     ]:
         add_p(doc, text)
     add_forecast_card_table(doc, cards)
@@ -379,7 +380,7 @@ def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
     sunflower = row(cards, "sunflower")
     ml_count = int((multi_cards["recommended_type"] == "machine_learning").sum())
     baseline_count = int((multi_cards["recommended_type"] == "baseline").sum())
-    add_fig(doc, FIGURES / "manuscript_figure1.png", "Fig. 1. Long-term trends of yield, crop area, fertiliser use, and irrigation in Poltava region, 2010-2024.")
+    add_fig(doc, FIGURES / "manuscript_figure1.png", "Fig. 1. Long-term trends of yield, crop area, fertiliser use, and irrigation in Poltava region, 2010-2024.", width=4.9)
     for text in [
         "The descriptive trends show that the three crops have different scales and dynamics. Maize has the largest yield range and the largest absolute errors. Sunflower has a narrower range, so low MAE values must still be interpreted together with percentage error. Wheat is comparatively stable but still hard to forecast because trend and year-to-year variation coexist in a short series.",
         f"The baseline-first selector changes the interpretation of the results. For wheat, the best ML model has MAE {fmt(wheat['best_ml_mae'])} t/ha, while the best baseline has MAE {fmt(wheat['best_baseline_mae'])} t/ha. The recommendation is therefore {wheat['recommended_method']}, not ML. This is the negative/control result of the study.",
@@ -387,8 +388,8 @@ def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         f"For sunflower, the recommendation is also {sunflower['recommended_method']} with MAE {fmt(sunflower['recommended_mae'])} t/ha. The best baseline has MAE {fmt(sunflower['best_baseline_mae'])} t/ha. The absolute errors are small, but this should be read against the lower yield scale of the crop.",
     ]:
         add_p(doc, text)
-    add_fig(doc, FIGURES / "mae_baselines_vs_ml.png", "Fig. 2. Baselines versus selected ML models on the 2022-2024 test window.")
-    add_fig(doc, FIGURES / "manuscript_figure3.png", "Fig. 3. Actual and forecast yield for the selected lag-only ML models.")
+    add_fig(doc, FIGURES / "mae_baselines_vs_ml.png", "Fig. 2. Baselines versus selected ML models on the 2022-2024 test window.", width=4.75)
+    add_fig(doc, FIGURES / "manuscript_figure3.png", "Fig. 3. Actual and forecast yield for the selected lag-only ML models.", width=4.65)
     for text in [
         f"The reliability bands add a second view. Test coverage inside the empirical validation-residual band is {float(wheat['test_coverage']):.1%} for wheat, {float(maize['test_coverage']):.1%} for maize, and {float(sunflower['test_coverage']):.1%} for sunflower. These values are not calibrated probability levels. They simply show whether test errors are ordinary relative to the validation period.",
         f"The feature-group diagnostics also differ by crop. Wheat is most sensitive to {wheat['top_feature_group']}, maize to {maize['top_feature_group']}, and sunflower to {sunflower['top_feature_group']}. This supports the main argument: under small official datasets, there is no universal predictor group or universal model winner.",
@@ -402,7 +403,7 @@ def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         "The approach is therefore conservative by design. It rewards improvement, but only when the improvement survives comparison with simple methods and remains understandable through the diagnostic outputs. This is a practical compromise between purely statistical benchmarking and the needs of applied agricultural decision support.",
     ]:
         add_p(doc, text)
-    add_fig(doc, FIGURES / "mini_feature_group_ablation.png", "Fig. 4. Feature-group ablation for the selected lag-only models.", width=4.45)
+    add_fig(doc, FIGURES / "mini_feature_group_ablation.png", "Fig. 4. Feature-group ablation for the selected lag-only models.", width=4.55)
     add_h(doc, "External Regional Check")
     for text in [
         f"The external check applies the same decision rule to four territories and three crops, producing {len(multi_cards)} comparable decisions. ML is recommended in {ml_count} cases, while {baseline_count} cases remain with a baseline. This pattern is important because it avoids the claim that ML automatically dominates small official-statistics datasets.",
@@ -427,7 +428,7 @@ def add_conclusions(doc: Document) -> None:
     for text in [
         "The project shows that small official agricultural datasets can support a reproducible forecasting benchmark, but only if evaluation is conservative. The main contribution is the multi-region baseline-first and reliability-aware decision layer. It prevents ML from being recommended automatically and makes model uncertainty visible through simple diagnostics.",
         "The final recommendations are crop- and territory-specific. Poltava wheat remains better served by a transparent baseline. Poltava maize and sunflower benefit from LightGBM, but maize also receives a reliability warning. Across Poltava, Vinnytsia, Cherkasy, and Ukraine, maize is the most consistent positive ML case, while wheat and sunflower include clear baseline-safe cases.",
-        "Future work should extend the same workflow to longer time periods, more crops, and a small number of carefully selected exogenous variables. The code is prepared for this because the recommendation tables, forecast cards, diagnostics, and article figures are generated from reproducible scripts.",
+        "Future work should extend the same workflow to longer time periods, more crops, and carefully selected exogenous variables. Neural and deep-learning models should be revisited only when denser FMS records, sensor data, weather grids, satellite observations, or field-operation logs are available. The code is prepared for this because the recommendation tables, forecast cards, diagnostics, and article figures are generated from reproducible scripts.",
         "For publication purposes, the key point is the change in framing. The article does not claim that machine learning is always better for crop yield forecasting. It claims that, for small official datasets, a model should pass a baseline-first decision rule and should be reported with reliability diagnostics.",
         "In its present form the workflow is a publication benchmark and a methodological template, not a replacement for local agronomic judgement or operational early-warning systems. Its value is that it makes small-data forecasting claims harder to overstate and easier to reproduce.",
     ]:
@@ -482,7 +483,7 @@ def build() -> None:
         add_results(doc, values)
         add_conclusions(doc)
         add_refs(doc)
-        doc.core_properties.title = "Baseline-First Crop Yield Forecasting with Reliability Diagnostics"
+        doc.core_properties.title = "Baseline-First Crop Yield Forecasting for Farm Management Decision Support"
         doc.core_properties.author = "Olena Kopishynska, Mark Fedorchenko, Yurii Utkin, Igor Sliusar, Viktor Liashenko, Alla Svitlychna, Svitlana Pysarenko"
         LOCAL_ARTICLE_DIR.mkdir(parents=True, exist_ok=True)
         doc.save(generated)
