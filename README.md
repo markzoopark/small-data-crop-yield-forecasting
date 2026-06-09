@@ -31,7 +31,6 @@ This is a benchmark for small annual datasets. It is not a production forecastin
 - `data/raw/agrostats/cherkasy/` - external region check data
 - `data/raw/agrostats/ukraine/` - national-level scale check data
 - `reports/` - generated metrics and reliability summaries
-- `paper/` - the draft article and figures
 - `tests/` - small tests for unit conversion, diagnostics, and reliability logic
 
 ## What the code does
@@ -86,7 +85,7 @@ Run tests:
 python -m pytest -q
 ```
 
-Build the draft article:
+Build the draft article locally, if the local `paper/` template and figures are present:
 
 ```bash
 python scripts/build_reliability_article.py
@@ -110,9 +109,7 @@ Important files in `reports/`:
 - `decision_threshold_sensitivity.csv` - checks margins 0.00, 0.03, 0.05, 0.10 t/ha
 - `novelty_evidence_table.csv` - compact table used in the article
 
-Article:
-
-- `paper/kopishynska_small_data_crop_forecasting_reliability.docx`
+The article DOCX and formatted article figures are kept locally and are not stored in this GitHub repository.
 
 ## Important warning
 
