@@ -1,13 +1,13 @@
 region,crop,best_baseline,best_ml,practical_gain_t_ha,recommended_method,reliability_label,reason
 Poltava,maize,FORECAST.LINEAR,LightGBM,0.16743394956008173,LightGBM,outside validation error scale,"ML clears the gain rule, but validation-residual coverage warns against overclaiming."
 Poltava,sunflower,ARIMA,LightGBM,0.12735716248616402,LightGBM,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
-Poltava,wheat,FORECAST.LINEAR,ElasticNet,-0.0492639871632492,FORECAST.LINEAR,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
+Poltava,wheat,FORECAST.LINEAR,ElasticNet,-0.04926398716324931,FORECAST.LINEAR,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
 Vinnytsia,maize,ARIMA,XGBoost,0.4742258442356454,XGBoost,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
 Vinnytsia,sunflower,ARIMA,LightGBM,0.05603340333039791,LightGBM,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
 Vinnytsia,wheat,FORECAST.LINEAR,ElasticNet,-0.1713389956499931,FORECAST.LINEAR,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
 Cherkasy,maize,ARIMA,XGBoost,0.3300985409764747,XGBoost,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
-Cherkasy,sunflower,ARIMA,ElasticNet,0.03514352616046898,ARIMA,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
+Cherkasy,sunflower,ARIMA,ElasticNet,0.03514352616046883,ARIMA,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
 Cherkasy,wheat,FORECAST.LINEAR,LightGBM,0.08476200941392936,LightGBM,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
 Ukraine,maize,ARIMA,ElasticNet,0.10627076039926442,ElasticNet,within expected error,ML clears the gain rule and test errors mostly stay within the validation-residual band.
 Ukraine,sunflower,ARIMA,XGBoost,-0.14865452311128619,ARIMA,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
-Ukraine,wheat,FORECAST.LINEAR,ElasticNet,-0.27939571891239773,FORECAST.LINEAR,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.
+Ukraine,wheat,FORECAST.LINEAR,ElasticNet,-0.2793957189123973,FORECAST.LINEAR,baseline safer,ML did not clear the practical gain rule; transparent baseline remains safer.

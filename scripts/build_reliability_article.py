@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-import shutil
 import tempfile
+import subprocess
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+from xml.etree import ElementTree as ET
 
 import pandas as pd
 from docx import Document
@@ -15,11 +17,14 @@ from docx.shared import Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER_DIR = ROOT / "paper"
-TEMPLATE_DOCX = PAPER_DIR / "template" / "style_template.docx"
 LOCAL_ARTICLE_DIR = ROOT.parent / "мини статья2"
-OUT_DOCX = LOCAL_ARTICLE_DIR / "kopishynska_small_data_crop_forecasting_reliability.docx"
+TEMPLATE_DOCM = LOCAL_ARTICLE_DIR / "kopishynska_682.docm"
+OUT_DOCM = LOCAL_ARTICLE_DIR / "kopishynska_small_data_crop_forecasting_reliability.docm"
 FIGURES = PAPER_DIR / "figures"
 REPORTS = ROOT / "reports"
+
+CONTENT_TYPES_NS = "http://schemas.openxmlformats.org/package/2006/content-types"
+DOCX_MAIN = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
 
 STYLE_FALLBACKS = {
     "papertitle": "Title",
@@ -53,6 +58,96 @@ def clear_body(doc: Document) -> None:
     for child in list(body):
         if child is not sect_pr:
             body.remove(child)
+
+
+def _read_xml(zip_file: ZipFile, name: str) -> ET.Element:
+    return ET.fromstring(zip_file.read(name))
+
+
+def _write_xml(root: ET.Element) -> bytes:
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def _content_type_part(element: ET.Element) -> str:
+    return element.get("PartName", "")
+
+
+def _content_type_value(element: ET.Element) -> str:
+    return element.get("ContentType", "")
+
+
+def _convert_docm_content_types_to_docx(root: ET.Element) -> ET.Element:
+    for element in list(root):
+        part_name = _content_type_part(element)
+        content_type = _content_type_value(element)
+        if part_name == "/word/document.xml":
+            element.set("ContentType", DOCX_MAIN)
+        if "vba" in part_name.lower() or "vba" in content_type.lower() or part_name.startswith("/customUI/"):
+            root.remove(element)
+    return root
+
+
+def _remove_relationships(root: ET.Element, type_fragments: tuple[str, ...]) -> ET.Element:
+    for element in list(root):
+        rel_type = element.get("Type", "")
+        if any(fragment in rel_type for fragment in type_fragments):
+            root.remove(element)
+    return root
+
+
+def _docm_to_editable_docx(template_docm: Path, output_docx: Path) -> None:
+    """Create a temporary docx from the macro template so python-docx can edit it."""
+    with ZipFile(template_docm) as source, ZipFile(output_docx, "w", ZIP_DEFLATED) as target:
+        for info in source.infolist():
+            name = info.filename
+            if name == "[Content_Types].xml":
+                root = _convert_docm_content_types_to_docx(_read_xml(source, name))
+                target.writestr(info, _write_xml(root))
+                continue
+            if name == "_rels/.rels":
+                root = _remove_relationships(_read_xml(source, name), ("ui/extensibility",))
+                target.writestr(info, _write_xml(root))
+                continue
+            if name == "word/_rels/document.xml.rels":
+                root = _remove_relationships(_read_xml(source, name), ("vbaProject",))
+                target.writestr(info, _write_xml(root))
+                continue
+            if name.startswith("customUI/") or "vba" in name.lower() or name == "word/vbaData.xml":
+                continue
+            target.writestr(info, source.read(name))
+
+
+def _package_generated_docx_as_docm(template_docm: Path, generated_docx: Path, output_docm: Path) -> None:
+    """Save the generated document as an openable macro-enabled Word file.
+
+    The article inherits styles and numbering from the real DOCM template. Directly
+    grafting the template VBA project into a new package produces a file that
+    LibreOffice cannot open, so the final package is written by LibreOffice's
+    DOCM filter instead of by manual ZIP surgery.
+    """
+    require(template_docm)
+    output_docm.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        outdir = Path(tmp)
+        result = subprocess.run(
+            [
+                "soffice",
+                f"-env:UserInstallation=file://{outdir / 'lo_profile'}",
+                "--headless",
+                "--convert-to",
+                "docm:MS Word 2007 XML VBA",
+                "--outdir",
+                str(outdir),
+                str(generated_docx),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        converted = outdir / f"{generated_docx.stem}.docm"
+        if not converted.exists():
+            raise RuntimeError(f"LibreOffice did not create DOCM output. stdout={result.stdout} stderr={result.stderr}")
+        converted.replace(output_docm)
 
 
 def set_headers(doc: Document) -> None:
@@ -172,11 +267,10 @@ def add_front(doc: Document, values: dict[str, pd.DataFrame]) -> None:
     ml_count = int((multi_cards["recommended_type"] == "machine_learning").sum())
     total_count = int(len(multi_cards))
     add_p(doc, "Baseline-First Crop Yield Forecasting with Reliability Diagnostics for Small Official Statistics", "papertitle")
-    add_p(doc, "Olena Kopishynska1  Mark Fedorchenko1  Yurii Utkin1", "author")
-    add_p(doc, "Igor Sliusar1  Viktor Liashenko2  Alla Svitlychna3 and Svitlana Pysarenko3", "author")
-    add_p(doc, "1 Poltava State Agrarian University, Department of Information Systems and Technologies, Poltava 36003, Ukraine", "address")
-    add_p(doc, "2 Poltava State Agrarian University, Department of Plant Science, Poltava 36003, Ukraine", "address")
-    add_p(doc, "3 Poltava State Agrarian University, Department of Entrepreneurship and Law, Poltava 36003, Ukraine", "address")
+    add_p(doc, "Olena Kopishynska1 [0000-0002-3138-7215]  Mark Fedorchenko1  Yurii Utkin1 [0000-0003-2732-4438]", "author")
+    add_p(doc, "Igor Sliusar1 [0000-0003-1197-5666]  Viktor Liashenko2 [0000-0003-0177-6209]", "author")
+    add_p(doc, "Alla Svitlychna3 [0000-0003-3674-5787] and Svitlana Pysarenko3 [0000-0003-4575-1417]", "author")
+    add_p(doc, "1,2,3 Poltava State Agrarian University, Poltava 36003, Ukraine", "address")
     add_p(doc, "olena.kopishynska@pdau.edu.ua", "address")
     abstract = (
         "Abstract. Crop yield forecasting from small official statistics is different from forecasting with dense "
@@ -201,9 +295,10 @@ def add_front(doc: Document, values: dict[str, pd.DataFrame]) -> None:
 
 
 def add_intro(doc: Document) -> None:
-    add_h(doc, "1 Introduction")
+    add_h(doc, "Introduction")
     for text in [
         "Digital agriculture often assumes that good forecasting requires dense data: satellite images, farm-level measurements, detailed weather grids, soil properties, and management logs. Such data are valuable, but they are not always available for regional institutions. In many real tasks the stable source is official annual agricultural statistics. These records are public and repeatable, but they are short and aggregated.",
+        "The authors' previous work addressed precision-farming information systems, ERP and FMS platforms for agri-food management, data-driven monitoring, and digital skills for agronomy education [1-5]. The present study continues this line but narrows the task to a reproducible forecasting decision layer for small official statistics.",
         "This creates a practical research problem. A machine-learning model can be trained on a small annual table, but the result may be fragile. Random splitting is not appropriate because the next year is the forecasting target. Hyperparameter tuning can leak future information if it is not constrained. Even when a model gives a good score, it may not be better than a simple linear trend or a lag-1 rule.",
         "The original long study already built a leakage-safe pipeline for AgroStats data and compared ML models with baselines. The present project moves the idea further. The central question is no longer which model has the lowest test MAE. The central question is which method should be recommended after baseline comparison and reliability checks.",
         "This change is important for the scientific story. In small-data forecasting, a negative result can be as useful as a positive one. Wheat is the main example in this project: the selected ML model is not recommended because the best simple baseline remains safer. Maize and sunflower show the opposite case, where ML provides enough improvement to be useful.",
@@ -215,7 +310,7 @@ def add_intro(doc: Document) -> None:
 
 
 def add_novelty(doc: Document, values: dict[str, pd.DataFrame]) -> None:
-    add_h(doc, "2 Novelty and Contribution")
+    add_h(doc, "Novelty and Contribution")
     cards = values["multi_cards"]
     region_summary = values["region_summary"]
     threshold = values["threshold"]
@@ -229,7 +324,7 @@ def add_novelty(doc: Document, values: dict[str, pd.DataFrame]) -> None:
     )
     for text in [
         "The novelty of the project is not that spreadsheet functions outperform machine learning, and not that one algorithm wins on all crops. Spreadsheet-style baselines are used as control models. Their role is to make the recommendation accountable: if an ML model cannot beat a transparent method by a practical margin, it should not be presented as the recommended forecast.",
-        "Compared with the original long manuscript, the new repository adds a decision layer around the models. The output is no longer only a leaderboard of ElasticNet, XGBoost, and LightGBM. It produces recommended methods, reliability labels, empirical prediction bands, feature-group diagnostics, and forecast cards.",
+        "Compared with earlier platform-oriented and data-driven decision-support work [3, 4], the new repository adds a decision layer around the models. The output is no longer only a leaderboard of ElasticNet, XGBoost, and LightGBM. It produces recommended methods, reliability labels, empirical prediction bands, feature-group diagnostics, and forecast cards.",
         f"The multi-region extension strengthens the contribution. The same rule is applied to Poltava, Vinnytsia, Cherkasy, and Ukraine for wheat, maize, and sunflower. This creates {len(cards)} region-crop decisions: {ml_count} recommend ML and {baseline_count} keep a baseline. The national Ukraine series is treated as a scale check rather than as a direct oblast replicate.",
         f"The threshold-sensitivity file tests practical margins of 0.00, 0.03, 0.05, and 0.10 t/ha. In the current run, {switch_count} region-crop decisions change when the margin changes. This is useful evidence for the article because it shows that the recommendation is controlled by an explicit rule, not by a manually chosen story after looking at the results.",
         "The strongest conceptual difference is the treatment of negative cases. Wheat remains a control case in Poltava, Vinnytsia, and Ukraine because the transparent baseline is safer; Cherkasy wheat is different and clears the ML rule. This mixed pattern is more credible than saying that ML is always better.",
@@ -239,7 +334,7 @@ def add_novelty(doc: Document, values: dict[str, pd.DataFrame]) -> None:
 
 
 def add_methods(doc: Document) -> None:
-    add_h(doc, "3 Materials and Methods")
+    add_h(doc, "Materials and Methods")
     for text in [
         "The main case study uses official AgroStats records for Poltava region, Ukraine, from 2010 to 2024. Vinnytsia, Cherkasy, and national-level Ukraine records are added as an external check. The target crops are wheat, maize, and sunflower. The raw data are stored as separate CSV files by crop and indicator. The pipeline loads these files, harmonises crop names and indicators, converts units, and builds one annual crop-level table per territory.",
         "Yield is converted to tonnes per hectare. Fertiliser indicators are represented as comparable per-hectare or share variables where possible. Irrigation volume is converted into cubic metres per hectare and millimetres. The main feature set uses lagged values and five-year historical means, so the model receives only information that could be known before the forecasted harvest year.",
@@ -247,15 +342,13 @@ def add_methods(doc: Document) -> None:
         "The ML models are ElasticNet, XGBoost, and LightGBM. They are deliberately tuned on a constrained grid because the dataset is too small for broad automated search. Baselines include naive lag-1, linear trend, LINEST with lagged predictors, and ARIMA. Forecast accuracy is reported as MAE, RMSE, and MAPE, with MAE used as the main selection metric.",
         "The code is organised as a reproducible pipeline. Running `python run_all.py` loads raw data, builds features, validates the Poltava dataset, trains models, computes baselines, runs reliability diagnostics, and exports report tables. Running `python scripts/run_multi_region.py` repeats the same decision workflow for Poltava, Vinnytsia, Cherkasy, and Ukraine. Article values are taken from generated CSV files, not manual calculations.",
         "Feature construction follows a strict time direction. For each crop-year, lagged yield and lagged input variables are used instead of contemporaneous values. Rolling means are based on earlier years only. This is a small detail technically, but it is central for the interpretation of the results. Without it, the model could learn from information that would not be known at the time of making the forecast.",
-        "The validation design is also deliberately simple. The 2019-2021 window is large enough to expose the model to recent variation, but small enough to preserve the 2022-2024 period as a final test. Because the whole dataset contains only fifteen years, no single split can fully represent uncertainty. The split is therefore treated as a transparent benchmark protocol rather than as proof of general performance.",
         "Baselines are implemented as first-class models, not as an afterthought. The naive lag-1 rule is a persistence forecast. The linear trend baseline uses time as the only predictor. LINEST represents a spreadsheet-friendly regression option that is easy for non-programming users to reproduce. ARIMA represents a standard univariate time-series competitor. This mix is important because a practical user may prefer a weaker but transparent method if the ML gain is small.",
-        "The metrics are interpreted at crop level. A one-tonne error has a different meaning for maize than for sunflower. MAE remains the selector metric because it is easy to explain and less dominated by a single bad test year than RMSE. MAPE is reported for context but is not used as the primary selector.",
     ]:
         add_p(doc, text)
 
 
 def add_workflow(doc: Document, values: dict[str, pd.DataFrame]) -> None:
-    add_h(doc, "4 Reliability-Aware Forecasting Workflow")
+    add_h(doc, "Reliability-Aware Forecasting Workflow")
     cards = values["cards"]
     wheat = row(cards, "wheat")
     maize = row(cards, "maize")
@@ -266,7 +359,6 @@ def add_workflow(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         "The third layer is feature stability. Feature-group ablation removes whole groups such as yield history, nitrogen, mineral-treated share, or irrigation. If removing a group increases MAE, that group is treated as useful for the selected forecast. This is easier to explain to agronomic users than a large list of individual model features.",
         "The final output is a forecast card for each crop. A card reports the recommended method, recommended MAE, best ML MAE, best baseline MAE, ML gain or loss, test coverage inside the empirical band, the most useful feature group, and a short interpretation. This is the project output that would be easiest for a regional analyst to read.",
         f"In the current run, wheat receives `{wheat['warning_label']}` and is assigned to {wheat['recommended_method']}. Maize receives `{maize['warning_label']}` and is assigned to {maize['recommended_method']}. Sunflower receives `{sunflower['warning_label']}` and is assigned to {sunflower['recommended_method']}. These labels are deliberately simple because the dataset is small.",
-        "The practical margin is intentionally separated from statistical significance. With only three test years, formal pairwise tests would be unstable. The margin is instead a user-facing threshold: if the ML improvement is smaller than 0.05 t/ha, the added complexity is not treated as worthwhile.",
         "The empirical bands are based only on validation residuals. This prevents the test period from defining its own uncertainty. The band width is the recent error scale observed before the final evaluation period. If a test observation falls outside that band, the problem is not automatically model failure, but it is a warning that the new year behaves differently from the validation period.",
         "The warning labels are designed for conservative use. `Within expected error` means the selected method clears the baseline rule and the test errors mostly stay inside the validation band. `Outside validation error scale` means that ML wins by MAE but the residual pattern is less reliable. `Baseline safer` means the model has not earned a recommendation over the best simple alternative.",
         "Forecast cards deliberately combine numbers and text. The card format connects the recommendation to the baseline comparison, empirical band, and most useful feature group. This is the main operational difference between the new project and the original long manuscript.",
@@ -277,7 +369,7 @@ def add_workflow(doc: Document, values: dict[str, pd.DataFrame]) -> None:
 
 
 def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
-    add_h(doc, "5 Experimental Results and Discussion")
+    add_h(doc, "Experimental Results and Discussion")
     cards = values["cards"]
     multi_cards = values["multi_cards"]
     region_summary = values["region_summary"]
@@ -305,19 +397,13 @@ def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
         "The baseline comparison also prevents a common interpretation error. If all attention is placed on the lowest ML score, wheat looks like a model-selection problem. In the reliability-aware view, it is a decision problem: should the model be recommended over a transparent baseline? For wheat, the answer is no.",
         "For maize, the selected ML method improves the absolute error enough to clear the practical margin, but the empirical coverage signal shows that the test years are not fully ordinary relative to validation residuals. This mixed message should be preserved in a small-data publication rather than smoothed away.",
         "For sunflower, the model result is more stable in absolute terms, but the smaller yield scale means that percentage errors remain relevant. The forecast card therefore keeps both the recommendation and the caution visible. In a practical workflow this would support a lightweight decision: use the ML forecast as the primary value, but keep the empirical band and recent baseline close for comparison.",
-        "The SHAP and ablation diagnostics are best read together. SHAP highlights individual predictors used by a fitted model, while ablation asks how model error changes when a whole predictor group is removed. Agreement between the two gives more confidence that a feature group is not just a random artefact. Disagreement is treated as a warning, not as a reason to force a single explanation.",
         "Several limitations follow directly from the design. The annual sample is short and the test set has only three years. The empirical bands are small-sample bands, not calibrated confidence intervals. The feature diagnostics are descriptive and model-dependent. These limitations define the correct use case for the repository.",
-        "The strongest use of the workflow is comparative. A researcher can add another region, a longer time period, or a new group of predictors, then ask whether the recommendation changes after the same baseline-first rule and reliability checks. This makes the code useful as a research scaffold even when the present numerical results remain local to Poltava region.",
         "The current results should not be read as a final ranking of algorithms. They demonstrate an evaluation protocol. ElasticNet, XGBoost, and LightGBM represent different modelling families, but the contribution is the protocol around them: temporal validation, baseline-first recommendation, residual-band diagnostics, and forecast-card reporting.",
-        "This distinction is useful for reviewers because it makes the novelty more precise. The paper is not trying to compete with large remote-sensing yield forecasting systems. Instead, it addresses the narrower but common case where the available data are official annual statistics and the research question is whether an ML workflow can be trusted enough to recommend over transparent baselines.",
-        "The same logic can be extended without changing the core design. Additional crops would test whether the baseline-first rule is crop-dependent. Additional weather or price variables could be added as new feature groups and evaluated through the same ablation table. The decision layer would remain unchanged.",
-        "For institutional users, the most useful deliverable is not the trained model object but the trace from input data to recommendation. The repository keeps this trace visible: raw CSV files are transformed into processed features, model metrics, baseline metrics, reliability bands, recommended-method tables, and forecast cards. Each article claim can therefore be checked against a named output file.",
-        "This traceability reduces the risk of accidental optimism. If a future change improves one crop but makes another crop worse than its baseline, the recommended-method table exposes that trade-off. The project is designed to make inconvenient results visible.",
         "The approach is therefore conservative by design. It rewards improvement, but only when the improvement survives comparison with simple methods and remains understandable through the diagnostic outputs. This is a practical compromise between purely statistical benchmarking and the needs of applied agricultural decision support.",
     ]:
         add_p(doc, text)
-    add_fig(doc, FIGURES / "mini_feature_group_ablation.png", "Fig. 4. Feature-group ablation for the selected lag-only models.")
-    add_h(doc, "6 External Regional Check")
+    add_fig(doc, FIGURES / "mini_feature_group_ablation.png", "Fig. 4. Feature-group ablation for the selected lag-only models.", width=4.45)
+    add_h(doc, "External Regional Check")
     for text in [
         f"The external check applies the same decision rule to four territories and three crops, producing {len(multi_cards)} comparable decisions. ML is recommended in {ml_count} cases, while {baseline_count} cases remain with a baseline. This pattern is important because it avoids the claim that ML automatically dominates small official-statistics datasets.",
         "The regional comparison supports the main article framing. Maize is the most consistent positive ML case: all four territories recommend an ML method, although Poltava maize keeps the warning label outside validation error scale. Wheat is mostly a negative/control case: Poltava, Vinnytsia, and Ukraine keep FORECAST.LINEAR, while Cherkasy wheat recommends LightGBM. Sunflower is mixed: Poltava and Vinnytsia recommend ML, whereas Cherkasy and Ukraine keep ARIMA.",
@@ -337,13 +423,12 @@ def add_results(doc: Document, values: dict[str, pd.DataFrame]) -> None:
 
 
 def add_conclusions(doc: Document) -> None:
-    add_h(doc, "7 Conclusions")
+    add_h(doc, "Conclusions")
     for text in [
         "The project shows that small official agricultural datasets can support a reproducible forecasting benchmark, but only if evaluation is conservative. The main contribution is the multi-region baseline-first and reliability-aware decision layer. It prevents ML from being recommended automatically and makes model uncertainty visible through simple diagnostics.",
         "The final recommendations are crop- and territory-specific. Poltava wheat remains better served by a transparent baseline. Poltava maize and sunflower benefit from LightGBM, but maize also receives a reliability warning. Across Poltava, Vinnytsia, Cherkasy, and Ukraine, maize is the most consistent positive ML case, while wheat and sunflower include clear baseline-safe cases.",
         "Future work should extend the same workflow to longer time periods, more crops, and a small number of carefully selected exogenous variables. The code is prepared for this because the recommendation tables, forecast cards, diagnostics, and article figures are generated from reproducible scripts.",
         "For publication purposes, the key point is the change in framing. The article does not claim that machine learning is always better for crop yield forecasting. It claims that, for small official datasets, a model should pass a baseline-first decision rule and should be reported with reliability diagnostics.",
-        "The public repository contains the model training code and the decision layer needed to read the results. Recommended methods, prediction bands, feature-group ablation, forecast cards, and reliability summaries make the article claims traceable to the pipeline.",
         "In its present form the workflow is a publication benchmark and a methodological template, not a replacement for local agronomic judgement or operational early-warning systems. Its value is that it makes small-data forecasting claims harder to overstate and easier to reproduce.",
     ]:
         add_p(doc, text)
@@ -352,6 +437,11 @@ def add_conclusions(doc: Document) -> None:
 def add_refs(doc: Document) -> None:
     add_h(doc, "References")
     refs = [
+        "Kopishynska O., Utkin Y., Galych O., Marenych M., Sliusar I. Main aspects of the creation of managing information system at the implementation of precision farming. 2020 IEEE 11th International Conference on Dependable Systems, Services and Technologies (DESSERT), Kyiv, Ukraine, 2020, pp. 404-410. doi: 10.1109/DESSERT50317.2020.9125072.",
+        "Kopishynska O., Utkin Y., Sliusar I., Muravlov V., Makhmudov K., Chip L. Application of modern enterprise resource planning systems for agri-food supply chains as a strategy for reaching the level of Industry 4.0 for non-manufacturing organizations. Engineering Proceedings. 2023;40:15. doi: 10.3390/engproc2023040015.",
+        "Kopishynska O., Utkin Y., Sliusar I., Galych O., Kovpak S., Liashenko V., Barabolia O. Comprehensive management of agroecosystem productivity on the platform of specialized farm management information systems. In: Callaos N., Gaile-Sarkane E., Lace N., Sanchez B., Savoie M. (eds.) Proceedings of the 28th World Multi-Conference on Systemics, Cybernetics and Informatics: WMSCI 2024, pp. 340-347. International Institute of Informatics and Cybernetics. doi: 10.54808/WMSCI2024.01.340.",
+        "Kopishynska O., Utkin Y., Sliusar I., Kalashnyk O., Moroz S., Liashenko V., Fedorchenko M., Kovpak S. Smart agricultural systems: data-driven approaches to monitoring and decision support. In: Callaos N., Gaile-Sarkane E., Lace N., Sanchez B., Savoie M. (eds.) Proceedings of the 29th World Multi-Conference on Systemics, Cybernetics and Informatics: WMSCI 2025, pp. 505-512. International Institute of Informatics and Cybernetics. doi: 10.54808/WMSCI2025.01.505.",
+        "Kopishynska O., Utkin Y., Lyashenko V., Barabolia O., Kalashnik O., Moroz S., Kartashova O. Information systems and technologies in agronomy and business: employers' requirements-oriented study in agricultural universities. Proceedings of the 25th World Multi-Conference on Systemics, Cybernetics and Informatics: WMSCI 2021, pp. 113-118. https://www.iiis.org/CDs2021/CD2021Summer/papers/SA745NT.pdf.",
         "Kamilaris A., Kartakoullis A., Prenafeta-Boldu F.X. A review on the practice of big data analysis in agriculture. Computers and Electronics in Agriculture. 2017;143:23-37.",
         "Jeong J.H. et al. Random forests for global and regional crop yield predictions. PLOS ONE. 2016;11:e0156571.",
         "Chlingaryan A., Sukkarieh S., Whelan B. Machine learning approaches for crop yield prediction and nitrogen status estimation in precision agriculture. Computers and Electronics in Agriculture. 2018;151:61-69.",
@@ -374,11 +464,13 @@ def add_refs(doc: Document) -> None:
 def build() -> None:
     for path in [FIGURES / "manuscript_figure1.png", FIGURES / "mae_baselines_vs_ml.png", FIGURES / "manuscript_figure3.png", FIGURES / "mini_feature_group_ablation.png"]:
         require(path)
-    require(TEMPLATE_DOCX)
+    require(TEMPLATE_DOCM)
     values = load_values()
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp) / "work.docx"
-        shutil.copy2(TEMPLATE_DOCX, work)
+        generated = Path(tmp) / "generated.docx"
+        clean_generated = Path(tmp) / "clean_generated.docx"
+        _docm_to_editable_docx(TEMPLATE_DOCM, work)
         doc = Document(work)
         clear_body(doc)
         set_headers(doc)
@@ -393,8 +485,10 @@ def build() -> None:
         doc.core_properties.title = "Baseline-First Crop Yield Forecasting with Reliability Diagnostics"
         doc.core_properties.author = "Olena Kopishynska, Mark Fedorchenko, Yurii Utkin, Igor Sliusar, Viktor Liashenko, Alla Svitlychna, Svitlana Pysarenko"
         LOCAL_ARTICLE_DIR.mkdir(parents=True, exist_ok=True)
-        doc.save(OUT_DOCX)
-    print(f"Built {OUT_DOCX}")
+        doc.save(generated)
+        Document(generated).save(clean_generated)
+        _package_generated_docx_as_docm(TEMPLATE_DOCM, clean_generated, OUT_DOCM)
+    print(f"Built {OUT_DOCM}")
 
 
 if __name__ == "__main__":

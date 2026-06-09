@@ -1,9 +1,9 @@
 feature,mean_abs_shap
-Mineral_treated_share_lag1,0.23427201030372394
-Yield_t_ha_lag1,0.2104274120173244
-Org_kg_ha_or_share_lag1,0.07326486304713514
+Mineral_treated_share_lag1,0.23427201030372424
+Yield_t_ha_lag1,0.21042741201732437
+Org_kg_ha_or_share_lag1,0.0732648630471354
 ma5_K,0.03299694476364383
-P2O5_kg_ha_lag1,0.013710769614091243
+P2O5_kg_ha_lag1,0.01371076961409133
 ma5_N,0.0
 ma5_Irrig_m3,0.0
 ma5_Org,0.0

@@ -11,9 +11,9 @@ crop,scenario,lag_config,model,params_json,validation_mae,validation_rmse,valida
 Кукурудза,in_season,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",2.1335433897944993,2.1335433897944993,43.28711376081225
 Кукурудза,in_season,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 4, ""n_estimators"": 300, ""subsample"": 0.8}",1.3898511950174968,1.3898511950174968,36.43097975959468
 Кукурудза,in_season,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",1.2680015518340715,1.2680015518340715,33.15530031978526
-Соняшник,lag_only,L1,elasticnet,"{""alpha"": 0.1, ""l1_ratio"": 0.8}",0.35732297924467993,0.35732297924467993,13.149600147565444
+Соняшник,lag_only,L1,elasticnet,"{""alpha"": 0.1, ""l1_ratio"": 0.8}",0.35732297924467965,0.35732297924467965,13.149600147565431
 Соняшник,lag_only,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 4, ""n_estimators"": 300, ""subsample"": 0.8}",0.43052062670389796,0.43052062670389796,15.746625291463303
 Соняшник,lag_only,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",0.424514349791494,0.424514349791494,15.855752136333345
-Соняшник,in_season,L1,elasticnet,"{""alpha"": 0.01, ""l1_ratio"": 0.2}",0.2291547241871704,0.2291547241871704,7.301438013533942
+Соняшник,in_season,L1,elasticnet,"{""alpha"": 0.01, ""l1_ratio"": 0.2}",0.2291547241871704,0.2291547241871704,7.301438013533954
 Соняшник,in_season,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 4, ""n_estimators"": 100, ""subsample"": 0.8}",0.5443805980682371,0.5443805980682371,18.95237145945809
 Соняшник,in_season,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 300, ""num_leaves"": 15, ""subsample"": 0.8}",0.45580591289251826,0.45580591289251826,16.76402260137545

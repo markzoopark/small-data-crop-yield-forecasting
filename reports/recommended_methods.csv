@@ -1,4 +1,4 @@
 crop,crop_en,recommended_type,recommended_method,recommended_mae,best_ml_model,best_ml_mae,best_baseline,best_baseline_method,best_baseline_mae,ml_gain_vs_baseline,practical_margin,test_coverage,warning_label
 Кукурудза,maize,machine_learning,LightGBM,0.6919988398727179,LightGBM,0.6919988398727179,FORECAST.LINEAR,FORECAST.LINEAR,0.8594327894327997,0.16743394956008173,0.05,0.3333333333333333,outside validation error scale
 Соняшник,sunflower,machine_learning,LightGBM,0.0413333719543529,LightGBM,0.0413333719543529,ARIMA,ARIMA,0.1686905344405169,0.127357162486164,0.05,1.0,within expected error
-Пшениця,wheat,baseline,FORECAST.LINEAR,0.4899739149739135,ElasticNet,0.5392379021371627,FORECAST.LINEAR,FORECAST.LINEAR,0.4899739149739135,-0.0492639871632492,0.05,0.6666666666666666,baseline safer
+Пшениця,wheat,baseline,FORECAST.LINEAR,0.4899739149739135,ElasticNet,0.5392379021371628,FORECAST.LINEAR,FORECAST.LINEAR,0.4899739149739135,-0.04926398716324931,0.05,0.6666666666666666,baseline safer

@@ -1,14 +1,14 @@
 crop,scenario,lag_config,model,params_json,validation_mae,validation_rmse,validation_mape
-Пшениця,lag_only,L1,elasticnet,"{""alpha"": 0.1, ""l1_ratio"": 0.5}",0.5792438059968683,0.5792438059968683,12.314095034926689
+Пшениця,lag_only,L1,elasticnet,"{""alpha"": 0.1, ""l1_ratio"": 0.5}",0.5792438059968678,0.5792438059968678,12.314095034926678
 Пшениця,lag_only,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.1, ""max_depth"": 2, ""n_estimators"": 300, ""subsample"": 0.8}",0.6073034032185873,0.6073034032185873,13.197705060388715
 Пшениця,lag_only,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",0.9889150511850954,0.9889150511850954,20.004835858610615
 Пшениця,in_season,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",0.7395252525252524,0.7395252525252524,14.164379813812097
 Пшениця,in_season,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 4, ""n_estimators"": 100, ""subsample"": 0.8}",0.8172085507710776,0.8172085507710776,16.64528113798217
 Пшениця,in_season,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",0.9254505868447364,0.9254505868447364,18.842497923507395
-Кукурудза,lag_only,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",1.9538387389048333,1.9538387389048333,29.05759868990947
+Кукурудза,lag_only,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",1.9538387389048328,1.9538387389048328,29.057598689909458
 Кукурудза,lag_only,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 2, ""n_estimators"": 100, ""subsample"": 0.8}",2.306489143371582,2.306489143371582,35.206123222013204
 Кукурудза,lag_only,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",3.2951226894952277,3.2951226894952277,49.12359147518881
-Кукурудза,in_season,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",1.692724389379796,1.692724389379796,25.189950829106355
+Кукурудза,in_season,L1,elasticnet,"{""alpha"": 1.0, ""l1_ratio"": 0.8}",1.6927243893797963,1.6927243893797963,25.189950829106355
 Кукурудза,in_season,L1,xgboost,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": 4, ""n_estimators"": 300, ""subsample"": 0.8}",2.111812744140625,2.111812744140625,33.432827397934176
 Кукурудза,in_season,L1,lightgbm,"{""colsample_bytree"": 0.8, ""learning_rate"": 0.03, ""max_depth"": -1, ""n_estimators"": 100, ""num_leaves"": 15, ""subsample"": 0.8}",2.7235993236018596,2.7235993236018596,40.396632595541284
 Соняшник,lag_only,L1,elasticnet,"{""alpha"": 0.1, ""l1_ratio"": 0.5}",0.417471968292241,0.417471968292241,13.451079171621759

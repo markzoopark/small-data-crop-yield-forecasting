@@ -85,7 +85,7 @@ Run tests:
 python -m pytest -q
 ```
 
-Build the draft article locally, if the local `paper/` template and figures are present:
+Build the draft article locally, if the local DOCM example and article figures are present:
 
 ```bash
 python scripts/build_reliability_article.py
@@ -109,7 +109,7 @@ Important files in `reports/`:
 - `decision_threshold_sensitivity.csv` - checks margins 0.00, 0.03, 0.05, 0.10 t/ha
 - `novelty_evidence_table.csv` - compact table used in the article
 
-The article DOCX and formatted article figures are kept locally and are not stored in this GitHub repository.
+The article DOCM and formatted article figures are kept locally and are not stored in this GitHub repository.
 
 ## Important warning
 
